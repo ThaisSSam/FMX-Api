@@ -1,70 +1,51 @@
 using System;
 using LojaApi.Entities;
+using LojaApi.Repositories.Interfaces;
 
-namespace LojaApi.Repositories
+public class ProdutoRepository : IProdutoRepository
 {
-    public class ProdutoRepository
+    private readonly
+    List<Produto> _produtos = new List<Produto>
     {
-        private static List<Produto> _produtos = new List<Produto>
-        {
-            new Produto {Id= 1, Nome = "Mouse", Valor= 50, Descricao= "Mouse com fio", Estoque= 10},
-            new Produto {Id= 2, Nome = "Teclado", Valor= 80, Descricao= "Teclado com fio", Estoque= 15},
-        };
-
-        private static int _nextId = 4;
-
-        // 1. Read (Ler Todos) 
-        public static List<Produto> GetAll()
-        {
-            return _produtos;
+        new Produto{
+            Id= 1,
+            Nome= "Mouse",
+            Valor= 40.9m,
+            Descricao= "Mouse com fio",
+            Estoque= 15,
+            Deletado= false 
         }
+    };
 
-        // 2. Read (Ler por ID)
-        public static Produto? GetById(int id)
-        {
-            // Retorna o primeiro produto com o ID, ou null se não encontrar 
-            return _produtos.FirstOrDefault(p => p.Id == id);
-        }
+    private int _nextId = 2;
+    public List<Produto> GetAll() => _produtos;
 
-        // 3. Create (Criar) 
-        public static Produto Add(Produto novoProduto)
-        {
-            novoProduto.Id = _nextId++; // Atribui o próximo ID 
-            _produtos.Add(novoProduto);
-            return novoProduto;
-        }
+    public Produto? GetById(int id) => _produtos.FirstOrDefault(c => c.Id == id);
 
-        // 4. Update (Substituir/Completo) 
-        public static Produto? Update(int id, Produto produtoAtualizado)
-        {
-            var produtoExistente = _produtos.FirstOrDefault(c => c.Id == id);
+    public Produto Add(Produto novoProduto)
+    {
+        novoProduto.Id = _nextId++;
+        _produtos.Add(novoProduto);
+        return novoProduto;
+    }
 
-            if (produtoExistente == null)
-            {
-                return null; // Não encontrou para atualizar 
-            }
+    public Produto? Update(int id, Produto produtoAtualizado)
+    {
+        var produtoExistente = GetById(id);
+        if (produtoExistente == null) return null;
+        produtoExistente.Nome = produtoAtualizado.Nome;
+        produtoExistente.Valor = produtoAtualizado.Valor;
+        produtoExistente.Descricao = produtoAtualizado.Descricao;
+        produtoExistente.Estoque = produtoAtualizado.Estoque;
+        return produtoExistente;
+    }
 
-            // O PUT (Update) substitui os campos 
-            produtoExistente.Nome = produtoAtualizado.Nome;
-            produtoExistente.Valor = produtoAtualizado.Valor;
-            produtoExistente.Descricao = produtoAtualizado.Descricao;
-            produtoExistente.Estoque = produtoAtualizado.Estoque; // Assume-se que todos os outros campos vieram
+    public bool Delete(int id)
+    {
+        var produtoParaDeletar = GetById(id);
+        if (produtoParaDeletar == null) return false;
 
-            return produtoExistente;
-        }
-
-        // 5. Delete (Excluir) 
-        public static bool Delete(int id)
-        {
-            var clienteParaDeletar = _produtos.FirstOrDefault(c => c.Id == id);
-
-            if (clienteParaDeletar == null)
-            {
-                return false; // Não encontrou para deletar 
-            }
-
-            _produtos.Remove(clienteParaDeletar);
-            return true;
-        }
+        _produtos.Remove(produtoParaDeletar);
+        return true;
     }
 }

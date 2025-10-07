@@ -9,5 +9,7 @@ namespace LojaApi.Entities{
         public decimal Valor { get; set; } = 0.0m;
         public string Descricao { get; set; } = string.Empty;
         public int Estoque { get; set; }
+
+        public bool Deletado{ get; set; }
     }
 }

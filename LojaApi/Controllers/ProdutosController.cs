@@ -1,90 +1,65 @@
-using System;
 using LojaApi.Entities;
-using LojaApi.Repositories;
+using LojaApi.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LojaApi.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class ProdutosController : ControllerBase
     {
-        [HttpGet]
-        public ActionResult<List<Produto>> GetAll()
+        private readonly IProdutoService _produtoService;
+
+        public ProdutosController(IProdutoService produtoService)
         {
-            var produtos = ProdutoRepository.GetAll();
-            // 200 OK - Sucesso 
-            return Ok(produtos);
+            _produtoService = produtoService;
+        }
+
+        [HttpGet]
+        public ActionResult Get()
+        {
+            return Ok(_produtoService.GetAll());
         }
 
         [HttpGet("{id}")]
         public ActionResult<Produto> GetById(int id)
         {
-            var produto = ProdutoRepository.GetById(id);
-
-            if (produto == null)
-            {
-                // 404 Not Found - Recurso não encontrado 
-                return NotFound();
-            }
-
-            // 200 OK - Sucesso 
+            var produto = _produtoService.GetById(id);
+            if (produto == null) return NotFound();
             return Ok(produto);
         }
 
         [HttpPost]
         public ActionResult<Produto> Add(Produto novoProduto)
         {
-            // Validação simples (o ideal é fazer validações mais complexas) 
             if (string.IsNullOrWhiteSpace(novoProduto.Nome))
             {
-                // 400 Bad Request - Erro no produto (dados inválidos) 
-                return BadRequest("O nome do produto é obrigatório.");
+                return BadRequest("O nome é obrigatório");
             }
-
-            var produtoCriado = ProdutoRepository.Add(novoProduto);
-
-            // 201 Created - Novo recurso criado com sucesso 
-            // Retorna o recurso criado e a URL para acessá-lo (boa prática REST) 
-            return CreatedAtAction(nameof(GetById), new { id = produtoCriado.Id }, produtoCriado);
+            var produtoCriado = _produtoService.Add( novoProduto);
+            return CreatedAtAction(nameof(GetById), new
+            { id = produtoCriado.Id }, produtoCriado);
         }
 
-        // Endpoint: PUT api/Produtos/{id} 
         [HttpPut("{id}")]
         public ActionResult<Produto> Update(int id, Produto produtoAtualizado)
         {
-            // Validação de entrada 
             if (string.IsNullOrWhiteSpace(produtoAtualizado.Nome))
             {
-                return BadRequest("O nome do produto é obrigatório para atualização.");
+                return BadRequest("O nome é obrigatório");
             }
-
-            var produto = ProdutoRepository.Update(id, produtoAtualizado);
-
-            if (produto == null)
-            {
-                // 404 Not Found - Tentou atualizar algo que não existe 
-                return NotFound();
-            }
-
-            // 200 OK - Sucesso (Recurso substituído) 
+            var produto = _produtoService.Add(produtoAtualizado);
+            if (produto == null) return NotFound();
             return Ok(produto);
-        } 
+        }
 
-        // Endpoint: DELETE api/Produtos/{id} 
-        [HttpDelete("{id}")] 
-        public IActionResult Delete(int id) // Usamos IActionResult pois não retornaremos um objeto Produto 
-        { 
-            var sucesso = ProdutoRepository.Delete(id); 
-
-            if (!sucesso) 
-            { 
-                // 404 Not Found - Tentou deletar algo que não existe 
-                return NotFound(); 
-            } 
-
-            // 204 No Content - Sucesso, mas não há corpo de resposta (padrão REST para DELETE) 
-            return NoContent();  
-        } 
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var sucesso = _produtoService.Delete(id);
+            if (!sucesso) return NotFound();
+            return NoContent();
+        }
     }
 }

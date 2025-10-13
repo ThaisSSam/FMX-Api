@@ -1,0 +1,12 @@
+# Ignore arquivos de configuração de ambiente
+appsettings.json
+appsettings.*.json
+
+# Ignore pastas e arquivos de build
+bin/
+obj/
+
+# Ignore arquivos do Visual Studio
+.vscode/
+*.user
+*.suo

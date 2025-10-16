@@ -1,6 +1,7 @@
 # Ignore arquivos de configuração de ambiente
 appsettings.json
 appsettings.*.json
+launchSettings.json
 
 # Ignore pastas e arquivos de build
 bin/

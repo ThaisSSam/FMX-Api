@@ -1,50 +1,46 @@
 using System;
-using System.Globalization;
 using LojaApi.Entities;
 using LojaApi.Repositories.Interfaces;
-namespace LojaApi.Services.Interfaces;
+using LojaApi.Services.Interfaces;
+
+namespace LojaApi.Services;
 
 public class ProdutoService : IProdutoService
 {
     private readonly IProdutoRepository _produtoRepository;
+    private readonly ICategoriaRepository _categoriaRepository;
 
-    public ProdutoService(IProdutoRepository produtoRepository)
+    public ProdutoService(
+        IProdutoRepository produtoRepository,
+        ICategoriaRepository categoriaRepository)
     {
         _produtoRepository = produtoRepository;
+        _categoriaRepository = categoriaRepository;
     }
 
-    public List<Produto> GetAll()
+    public List<Produto> ObterTodos()
     {
-        return _produtoRepository.GetAll().Where(c =>c.Deletado == false).ToList();
+        return _produtoRepository.ObterTodos().Where(p => p.Estoque > 0).ToList();
     }
 
-    public Produto? GetById(int id)
+    public Produto? ObterPorId(int id)
     {
-        return _produtoRepository.GetById(id);
+        return _produtoRepository.ObterPorId(id);
     }
 
-    public Produto Add(Produto novoProduto)
+    public Produto Adicionar(Produto novoProduto)
     {
-        novoProduto.Nome = novoProduto.Nome.ToUpper();
-        novoProduto.Descricao = novoProduto.Descricao.ToUpper();
-        novoProduto.Deletado = false;
-        return _produtoRepository.Add(novoProduto);
-    }
-
-    public Produto? Update(int id, Produto produtoAtualizado)
-    {
-        if (id != produtoAtualizado.Id) return null;
-        return _produtoRepository.Update(id, produtoAtualizado);
-    }
-
-    public bool Delete(int id)
-    {
-        var produto = _produtoRepository.GetById(id);
-        if (produto != null)
-        {
-            produto.Deletado = true;
-            return _produtoRepository.Update(id, produto) != null;
+        var categoria = _categoriaRepository.ObterPorId(novoProduto.CategoriaId);
+        if (categoria == null)
+        { 
+            throw new Exception("A categoria informada não existe.");
         }
-        return false;
+
+        if (categoria.Nome.Equals("Eletrônicos", StringComparison.OrdinalIgnoreCase) && novoProduto.Preco < 60.00m)
+        {
+            throw new Exception("Produtos da categoria 'Eletrônicos' devem custar no mínimo R$ 60,00.");
+        }
+
+        return _produtoRepository.Adicionar(novoProduto);
     }
 }

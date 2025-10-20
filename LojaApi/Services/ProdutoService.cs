@@ -1,6 +1,7 @@
 using System;
 using LojaApi.Entities;
-using LojaApi.Repositories.Interfaces;
+using LojaApi.Infra.DTOs;
+using LojaApi.Infra.Repositories.Interfaces;
 using LojaApi.Services.Interfaces;
 
 namespace LojaApi.Services;
@@ -28,19 +29,53 @@ public class ProdutoService : IProdutoService
         return _produtoRepository.ObterPorId(id);
     }
 
-    public Produto Adicionar(Produto novoProduto)
+    public Produto Adicionar(CriarProduto produtoDto)
     {
+        var novoProduto = new Produto
+        {
+            Nome = produtoDto.Nome.ToUpper(),
+            Preco = produtoDto.Preco,
+            Estoque = produtoDto.Estoque,
+            CategoriaId = produtoDto.CategoriaId
+        };
+
         var categoria = _categoriaRepository.ObterPorId(novoProduto.CategoriaId);
         if (categoria == null)
-        { 
+        {
             throw new Exception("A categoria informada não existe.");
         }
 
-        if (categoria.Nome.Equals("Eletrônicos", StringComparison.OrdinalIgnoreCase) && novoProduto.Preco < 60.00m)
+        if (categoria.Nome.Equals("Eletrônicos", StringComparison.OrdinalIgnoreCase) && novoProduto.Preco < 50.00m)
         {
-            throw new Exception("Produtos da categoria 'Eletrônicos' devem custar no mínimo R$ 60,00.");
+            throw new Exception("Produtos da categoria 'Eletrônicos' devem custar no mínimo R$ 50,00.");
         }
 
         return _produtoRepository.Adicionar(novoProduto);
+    }
+    
+    public ProdutoDetalhado? ObterDetalhesPorId(int id)
+    {
+        var produto = _produtoRepository.ObterPorId(id);
+        if (produto == null) return null;
+
+        return new ProdutoDetalhado
+        {
+            Id = produto.Id,
+            Nome = produto.Nome.ToUpper(),
+            Preco = produto.Preco,
+            Estoque = produto.Estoque,
+            CategoriaId = produto.CategoriaId
+        };
+
+        // var produtoSalvo = _produtoRepository.Adicionar(novoProduto);
+
+        // var produtoRetorno = _produtoRepository.ObterPorId(novoProduto.Id);
+        // var produtoRetornoDto = new ProdutoDTO
+        // {
+        //     Nome = produtoRetorno.Nome,
+        //     Preco = produtoRetorno.Preco == null ? 0 : produto.Preco
+        // };
+
+        // return produtoRetornoDto;
     }
 }

@@ -1,7 +1,7 @@
 using System;
-using LojaApi.Data;
 using LojaApi.Entities;
-using LojaApi.Repositories.Interfaces;
+using LojaApi.Infra.Context;
+using LojaApi.Infra.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace LojaApi.Repositories;
@@ -13,7 +13,6 @@ public class ProdutoDBRepository : IProdutoRepository
 
     public List<Produto> ObterTodos()
     {
-        // Eager Loading: Traz os dados da Categoria junto com os Produtos. 
         return _context.Produtos.Include(p => p.Categoria).ToList();
     }
 

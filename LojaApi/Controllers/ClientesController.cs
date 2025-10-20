@@ -1,5 +1,5 @@
-// Controllers/ClientesController.cs
 using LojaApi.Entities;
+using LojaApi.Infra.DTOs;
 using LojaApi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,22 +23,19 @@ namespace LojaApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Cliente> GetById(int id)
+        public ActionResult<ClienteDetalhadoDto> GetById(int id)
         {
-            var cliente = _clienteService.ObterPorId(id);
-            if (cliente == null) return NotFound();
-            return Ok(cliente);
+            var clienteDto = _clienteService.ObterDetalhesPorId(id);
+            if (clienteDto == null) return NotFound();
+            return Ok(clienteDto);
         }
 
         [HttpPost]
-        public ActionResult<Cliente> Add(Cliente novoCliente)
+        public ActionResult<ClienteDetalhadoDto> Add(CriarClienteDto clienteDto)
         {
-            if (string.IsNullOrWhiteSpace(novoCliente.Nome))
-            {
-                return BadRequest("O nome do cliente é obrigatório.");
-            }
-            var clienteCriado = _clienteService.Adicionar(novoCliente);
-            return CreatedAtAction(nameof(GetById), new { id = clienteCriado.Id }, clienteCriado);
+            var clienteCriado = _clienteService.Adicionar(clienteDto);
+            var dtoRetorno = _clienteService.ObterDetalhesPorId(clienteCriado.Id);
+            return CreatedAtAction(nameof(GetById), new { id = clienteCriado.Id }, dtoRetorno);
         }
 
         [HttpPut("{id}")]

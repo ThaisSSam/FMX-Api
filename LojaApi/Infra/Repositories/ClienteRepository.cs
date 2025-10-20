@@ -1,5 +1,5 @@
 using LojaApi.Entities;
-using LojaApi.Repositories.Interfaces;
+using LojaApi.Infra.Repositories.Interfaces;
 
 public class ClienteRepository : IClienteRepository
 {
@@ -14,7 +14,10 @@ public class ClienteRepository : IClienteRepository
 
     public List<Cliente> ObterTodos() => _clientes;
 
-    public Cliente? ObterPorId(int id) => _clientes.FirstOrDefault(c => c.Id == id);
+    public Cliente? ObterPorId(int id)
+    {
+        return _clientes.FirstOrDefault(x => x.Id == id);
+    }
 
     public Cliente Adicionar(Cliente novoCliente)
     {
@@ -25,6 +28,8 @@ public class ClienteRepository : IClienteRepository
 
     public Cliente? Atualizar(int id, Cliente clienteAtualizado)
     {
+        if (clienteAtualizado.Id != id) return null;
+
         var clienteExistente = ObterPorId(id);
         if (clienteExistente == null) return null;
 

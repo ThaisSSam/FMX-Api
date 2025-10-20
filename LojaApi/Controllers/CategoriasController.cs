@@ -2,6 +2,7 @@ using LojaApi.Entities;
 using LojaApi.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using LojaApi.Infra.DTOs;
 
 namespace LojaApi.Controllers
 {
@@ -16,9 +17,20 @@ namespace LojaApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Categoria>> GetAll()
+        public ActionResult<List<CategoriaDTO>> GetAll()
         {
-            return Ok(_categoriaService.ObterTodos());
+            var categorias = _categoriaService.ObterTodos();
+
+            var categoriasDto = categorias
+                .Select(c => new CategoriaDTO 
+                {
+                    Id = c.Id,
+                    Nome = c.Nome
+                })
+                .ToList();
+            
+            // 3. Retorna a lista de DTOs, resolvendo o erro de ciclo.
+            return Ok(categoriasDto);
         }
 
         [HttpGet("{id}")]
@@ -26,7 +38,13 @@ namespace LojaApi.Controllers
         {
             var categoria = _categoriaService.ObterPorId(id);
             if (categoria == null) return NotFound();
-            return Ok(categoria);
+            var categoriaDto = new CategoriaDTO
+            {
+                Id = categoria.Id,
+                Nome = categoria.Nome
+            };
+            
+            return Ok(categoriaDto);
         }
 
         [HttpPost]

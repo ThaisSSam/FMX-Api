@@ -1,7 +1,8 @@
 // Program.cs
-using LojaApi.Data;
+using LojaApi.Infra.Context;
+using LojaApi.Infra.Repositories;
+using LojaApi.Infra.Repositories.Interfaces;
 using LojaApi.Repositories;
-using LojaApi.Repositories.Interfaces;
 using LojaApi.Services;
 using LojaApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,6 @@ builder.Services.AddControllers();
  
 // 1. Configuração do DbContext com PostgreSQL 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection"); 
-
 builder.Services.AddDbContext<LojaContext>(options => 
     options.UseNpgsql(connectionString));
 
@@ -30,12 +30,9 @@ builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IClienteRepository, ClienteDBRepository>();
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>(); 
-
 builder.Services.AddScoped<IProdutoRepository, ProdutoDBRepository>(); 
-
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
-
-builder.Services.AddScoped<ICategoriaRepository, CategoriaDBRepository>(); 
+builder.Services.AddScoped<ICategoriaRepository, CategoriaDBRepository>();
 
 // Configuração do Swagger
 builder.Services.AddEndpointsApiExplorer();
